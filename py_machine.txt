@@ -1,0 +1,3 @@
+[py_machine]
+py_3_scripts=C:/Users/USER/AppData/Local/Programs/Python/Python36/Scripts
+py_2_scripts=C:/Python27/Scripts

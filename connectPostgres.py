@@ -57,7 +57,6 @@ def getGeom(Xmin,Ymin,Xmax,Ymax,Projection):
 	conn = psycopg2.connect(**config())
 	cur = conn.cursor()
 	state = 'SELECT ST_MakeEnvelope('+ str(Xmin) +',' + str(Ymin) +','+ str(Xmax) +','+ str(Ymax) +','+ str(Projection)  +')'
-	print (state)
 	cur.execute(state)
 	records = cur.fetchall()
 	conn.close()

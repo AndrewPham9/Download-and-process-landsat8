@@ -60,22 +60,25 @@ def Download_Landsat_8 (lowLeftLat,lowLeftLong,upRightLat,upRightLong,date):
     jsonSearch = {
     	"jsonRequest":jsonSearch
     }
-
-    print (jsonSearch)
+    
     #search for DownloadURL in repSearch response
     repSearch = requests.post(urlSearch, jsonSearch)
     urlDown = repSearch.json()
     print (urlDown)
     #trim urlDown to actual download in usgs
-    A = urlDown['data']['results'][0]['metadataUrl']
-    B = urlDown['data']['results'][0]['downloadUrl']
-    C = urlDown['data']['results'][0]['displayId']
-
-    urlDown = B[0:40]+A[44:50]+B[70:91]+'/STANDARD/EE'
-    #get data in url or HTML or st else.
-    h = s1.head(urlDown, allow_redirects=True)
-    yu.download_file(h.url)
-
+    C = list()
+    #some times 1 shp cut 2 or 3 scenes
+    results = urlDown['data']['results']
+    print (results)
+    for result in results:
+        A = result['metadataUrl']
+        B = result['downloadUrl']
+        urlDown = B[0:40]+A[44:50]+B[70:91]+'/STANDARD/EE'
+        print (urlDown)
+        #get data in url or HTML or st else.
+        h = s1.head(urlDown, allow_redirects=True)
+        yu.download_file(h.url)
+        C.append(result['displayId'])
     return (C)
 def main ():
     parser = argparse.ArgumentParser()
@@ -85,7 +88,7 @@ def main ():
     parser.add_argument("-r2", dest = "upRightLat" ,help = "put upRightLat here", type = str)
     parser.add_argument("-da", dest = "date" ,help = "put date here", type = str)
     args = parser.parse_args()
-    result = Download_Landsat_8("9.765700445828669","106.02748811899865","10.340238060900552","106.83092331001583","20190612")
+    result = Download_Landsat_8(args.lowLeftLong,args.lowLeftLat,args.upRightLong,args.upRightLat,args.date)
 
 if __name__=='__main__':
     main()  
