@@ -60,9 +60,10 @@ def run(folder):
 	    config_this.createTiff(band, band_buffer, outband)
 
 	def do_ats_correct(folder, band):
+		path_band = path['%s'%(band)]
+		Fbin5_band =  find_1st_valid_detail(reflectance(path_band,Mp,Ap,sinSE))
 		#((DN*Mp)+ Ap)/sinSE
-		expression = '((%s*%f)+%f)/%f-%f' % (band, Mp, Ap, sinSE, Fbin5s['%s'%(band)])
-
+		expression = '((%s*%f)+%f)/%f-%f' % (band, Mp, Ap, sinSE, Fbin5_band)
 		out_filename = folder+'/'+os.path.basename(folder)+'_' + band + 'product1.TIF'
 		calTiff (folder, expression, out_filename)
 		setNotadata_0(out_filename,np.nan)
@@ -79,22 +80,12 @@ def run(folder):
 	Mp = 0.00002
 	Ap = -0.1
 
-	B2, B3, B4, B5 = dict (), dict (), dict (), dict ()
 	Fbin5s = dict()
-	B2['path'] = folder + '/' +os.path.basename(folder) + '_B2.TIF'
-	B3['path'] = folder + '/' +os.path.basename(folder) + '_B3.TIF'
-	B4['path'] = folder + '/' +os.path.basename(folder) + '_B4.TIF'
-	B5['path'] = folder + '/' +os.path.basename(folder) + '_B5.TIF'
-
-	B2['Fbin5'] = find_1st_valid_detail(reflectance(B2['path'],Mp,Ap,sinSE))
-	B3['Fbin5'] = find_1st_valid_detail(reflectance(B3['path'],Mp,Ap,sinSE))
-	B4['Fbin5'] = find_1st_valid_detail(reflectance(B4['path'],Mp,Ap,sinSE))
-	B5['Fbin5'] = find_1st_valid_detail(reflectance(B5['path'],Mp,Ap,sinSE))
-
-	Fbin5s['B2'] = B2['Fbin5']
-	Fbin5s['B3'] = B3['Fbin5']
-	Fbin5s['B4'] = B4['Fbin5']
-	Fbin5s['B5'] = B5['Fbin5']
+	path = dict()
+	path['B2'] = folder + '/' +os.path.basename(folder) + '_B2.TIF'
+	path['B3'] = folder + '/' +os.path.basename(folder) + '_B3.TIF'
+	path['B4'] = folder + '/' +os.path.basename(folder) + '_B4.TIF'
+	path['B5'] = folder + '/' +os.path.basename(folder) + '_B5.TIF'
 
 	bands = ['B2','B3','B4','B5']
 

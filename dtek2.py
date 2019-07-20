@@ -51,7 +51,7 @@ def run(shp,date,province):
     #create a landsat folder
     landsat_folders = ls8Down.Download_Landsat_8(str(lowLeftLat),str(lowLeftLong),str(upRightLat),str(upRightLong),str(date))
     # landsat_folders = [
-                    # 'LC08_L1TP_125052_20160228_20180523_01_T1'
+    #                 'LC08_L1TP_125052_20160228_20180523_01_T1'
                     # ,'LC08_L1TP_125052_20140326_20170424_01_T1'
                     # ,'LC08_L1TP_125052_20150209_20180523_01_T1'
                     # ,'LC08_L1TP_125052_20170214_20170228_01_T1'
