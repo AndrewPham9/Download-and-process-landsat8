@@ -47,29 +47,17 @@ def run(shp,date,province):
     print (lowLeftLong)
     print (upRightLat)
     print (upRightLong)
-
+    
     #create a landsat folder
     landsat_folders = ls8Down.Download_Landsat_8(str(lowLeftLat),str(lowLeftLong),str(upRightLat),str(upRightLong),str(date))
-    # landsat_folders = [
-    #                 'LC08_L1TP_125052_20160228_20180523_01_T1'
-                    # ,'LC08_L1TP_125052_20140326_20170424_01_T1'
-                    # ,'LC08_L1TP_125052_20150209_20180523_01_T1'
-                    # ,'LC08_L1TP_125052_20170214_20170228_01_T1'
-                    # ,'LC08_L1TP_125052_20180217_20180307_01_T1'
-                    # ,'LC08_L1TP_125052_20190220_20190222_01_T1'
-                    # ,'LC08_L1TP_125053_20140326_20170424_01_T1'
-                    # ,'LC08_L1TP_125053_20150209_20180523_01_T1'
-                    # ,'LC08_L1TP_125053_20160228_20180523_01_T1'
-                    # ,'LC08_L1TP_125053_20180217_20180307_01_T1'
-                    # ,'LC08_L1TP_125053_20170214_20170228_01_T1'
-                    # ,'LC08_L1TP_125053_20190220_20190222_01_T1'
-                    # ]
     # print (landsat_folders)
-    #create a dictionary of all diriect folder, incase process many images once
-    all_sum_direct_folder = list()
-    #process each tar then add final to a tuple all_sum_direct_folder
+    # create a dictionary of all diriect folder, incase process many images once
+    # all_sum_direct_folder = list()
+    # process each tar then add final to a tuple all_sum_direct_folder
     for landsat_folder in landsat_folders:
         direct_folder = province + 'IMAGES'
+        NDVI_folder = direct_folder + '/'+direct_folder+'_NDVI'
+        LST_folder = direct_folder + '/'+direct_folder+'_LST'
         if not os.path.exists(landsat_folder):
             os.mkdir(landsat_folder)
         else:
@@ -125,49 +113,54 @@ def run(shp,date,province):
         clipMosaic.clipFolder(landsat_folder,direct_folder,shp,band = 'B10')
         clipMosaic.clipFolder(landsat_folder,direct_folder,shp,band = 'BQA')
 
-
-
         #remove zipfile and landsat_folder
         # os.remove(zipFile)
         shutil.rmtree(landsat_folder)
         #cal NDVI and LST then write a record to postgreSQL
         cal.NDVI(direct_folder)
         cal.LST(direct_folder)
-
         config_this.bring (direct_folder,sum_direct_folder)
         shutil.rmtree(direct_folder)
-        #add sumdirect folder to all_direct_folder incase many process once
-        all_sum_direct_folder.append(sum_direct_folder)
 
-    all_sum_direct_folder = tuple(all_sum_direct_folder)    
-    #mosaic for each folder
-    for sum_direct_folder in all_sum_direct_folder:
-        # clipMosaic.MosaicFolder(sum_direct_folder,'B2ref2')
-        # clipMosaic.MosaicFolder(sum_direct_folder,'B3ref2')
-        # clipMosaic.MosaicFolder(sum_direct_folder,'B4ref2')    #mosaic after have folder for true color
+    if not os.path.exists(NDVI_folder):
+        os.mkdir(NDVI_folder)
+    else:
+        pass
 
-        #for process
-        clipMosaic.MosaicFolder(sum_direct_folder,'BNDVI')
-        clipMosaic.MosaicFolder(sum_direct_folder,'BLST')
-        Tifs = config_this.getFoldTiff(sum_direct_folder)
-        for Tif in Tifs:
-            if 'BNDVI' in Tif:
-                pathNDVI = Tif
-            elif 'BLST' in Tif:
-                pathLST = Tif
-            else:
-                os.remove(Tif)
-        fieldsValues = {
-            'location' : pathNDVI,
-            'the_geom' : connectPostgres.getGeom(lowLeftLong,lowLeftLat,upRightLong,upRightLat,4326)
-        }
-        connectPostgres.insertSQL('processed_images',**fieldsValues)
+    if not os.path.exists(LST_folder):
+        os.mkdir(LST_folder)
+    else:
+        pass
 
-        fieldsValues ={
-            'location' : pathLST,
-            'the_geom' : connectPostgres.getGeom(lowLeftLong,lowLeftLat,upRightLong,upRightLat,4326)
-        }
-        connectPostgres.insertSQL('processed_images',**fieldsValues)
+    clipMosaic.MosaicFolder(sum_direct_folder,'BNDVI')
+    clipMosaic.MosaicFolder(sum_direct_folder,'BLST')
+
+    Tifs = config_this.getFoldTiff(sum_direct_folder)
+
+    for Tif in Tifs:
+        if 'BNDVI' in Tif:
+        	new_tif = NDVI_folder + '/' + Tif.split('/')[-1]
+        	pathNDVI = new_tif
+        	shutil.move(Tif, new_tif)
+        elif 'BLST' in Tif:
+        	new_tif = LST_folder + '/' + Tif.split('/')[-1]
+        	pathLST = new_tif
+        	shutil.move(Tif, new_tif)
+        else:
+            os.remove(Tif)
+    os.remove(sum_direct_folder)
+    print ('Toi_day_chua_xoa')
+    fieldsValues = {
+        'location' : pathNDVI,
+        'the_geom' : connectPostgres.getGeom(lowLeftLong,lowLeftLat,upRightLong,upRightLat,4326)
+    }
+    connectPostgres.insertSQL('processed_images',**fieldsValues)
+
+    fieldsValues ={
+        'location' : pathLST,
+        'the_geom' : connectPostgres.getGeom(lowLeftLong,lowLeftLat,upRightLong,upRightLat,4326)
+    }
+    connectPostgres.insertSQL('processed_images',**fieldsValues)
 
 
 def main ():

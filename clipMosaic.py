@@ -46,13 +46,20 @@ def MosaicFolder (inFolder = None,band= None):
 		#
 		alpha = 'NaN'
 		inRaster = str()
+		inRasterList = list()
 		Tifs = 	getFoldTiff (inFolder)
 		for Tif in Tifs:
 			if band in Tif:
 				inRaster = inRaster + ' ' + Tif
-				print (inRaster)
+				inRasterList.append(Tif)
+				
 		outRaster = inFolder + '/' + os.path.basename(inFolder) + '_'+band
 		# -a_nodata = NaN for no color out side the image when display in pyplot
 		command="py -3 "+py_scripts+"/gdal_merge.py -o "+outRaster+".TIF -of GTiff -ot Float32 -n " + alpha + " -a_nodata NaN"+ inRaster
-		subprocess.Popen(command,shell=True)
+		p1 = subprocess.Popen(command,shell=True)
+		p1.wait()
+		print ('xoa nhung anh nay')
+		print (inRasterList)
+		for tif in inRasterList:
+			os.remove(tif)
 # MosaicFolder('D:/python/STAC_intern_project/Download-and-process-landsat8/HoChiMinhIMAGES/HoChiMinhIMAGES_20140326', 'BNDVI')

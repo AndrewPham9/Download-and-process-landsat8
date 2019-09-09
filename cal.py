@@ -55,8 +55,7 @@ def calTiff (folder, expression, out_filename,NoDataValue = 'NaN'):
 
 	
 	#then put all of them in a cmdLine
-	cmdLine = ("py -3 "+py_scripts+"/gdal_calc.py --calc="+
-				expression+' --type=Float32 --NoDataValue=' +NoDataValue+ ' --outfile='+out_filename+assign)
+	cmdLine = "py -3 "+py_scripts+"/gdal_calc.py --calc="+expression+' --type=Float32 --NoDataValue=' +NoDataValue+ ' --outfile='+out_filename+assign
 	p = subprocess.Popen(cmdLine,shell=True)
 	p.wait()
 	print (cmdLine)
